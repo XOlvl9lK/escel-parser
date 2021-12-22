@@ -15,7 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (input?.files?.[0]?.path) {
       path = input.files[0].path
       let pathArr
-      if (process.platform === 'linux') {
+      if (process.platform === 'linux' || process.platform === 'darwin') {
         pathArr = input.files[0].path.split('/')
       } else {
         pathArr = input.files[0].path.split('\\')
