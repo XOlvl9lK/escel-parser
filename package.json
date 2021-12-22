@@ -23,7 +23,8 @@
     "electron": "^16.0.5"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "xlsx": "^0.17.4"
   },
   "config": {
     "forge": {

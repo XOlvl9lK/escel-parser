@@ -5,21 +5,25 @@
     <meta name='viewport'
           content='width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0'>
     <meta http-equiv='X-UA-Compatible' content='ie=edge'>
-    <link href="./styles.css" rel="stylesheet">
+    <link href="./styles.css" rel="stylesheet" type="text/css">
     <title>Hello World!</title>
 </head>
 <body>
 
 <h1 class='header'>Excel parser</h1>
-<input id='input' type='file'>
-<div>
-    <span id='path' class='path'></span>
+
+<div class="field__wrapper">
+    <input name="file" type="file" name="file" id="field__file-2" class="field field__file">
+    <label class="field__file-wrapper" for="field__file-2">
+        <div class="field__file-fake">Файл не выбран</div>
+        <div class="field__file-button">Выбрать</div>
+    </label>
 </div>
-<div>
-    <button id='ping'>ping</button>
-</div>
-<div class='other'>
-    <p id='other'></p>
+
+<div class='warning'></div>
+
+<div class='button-wrapper'>
+    <button id="json" class="button">Преобразовать в JSON</button>
 </div>
 </body>
 </html>
