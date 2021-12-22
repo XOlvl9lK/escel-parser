@@ -14,7 +14,12 @@ window.addEventListener('DOMContentLoaded', () => {
   input.addEventListener('change', (event) => {
     if (input?.files?.[0]?.path) {
       path = input.files[0].path
-      const pathArr = input.files[0].path.split('\\')
+      let pathArr
+      if (process.platform === 'linux') {
+        pathArr = input.files[0].path.split('/')
+      } else {
+        pathArr = input.files[0].path.split('\\')
+      }
       const fileName = pathArr[pathArr.length - 1]
       labelForInput.innerText = fileName
       if (fileName?.split('.')?.[1] === 'xls' || fileName?.split('.')?.[1] === 'xlsx') {
