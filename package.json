@@ -10,7 +10,11 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "make-mac": "electron-forge make --platform darwin",
-    "make-linux": "electron-forge make --platform linux"
+    "make-linux": "electron-forge make --platform linux",
+    "pack": "electron-builder --dir",
+    "dist-win": "electron-builder -w",
+    "dist-mac": "electron-builder -m",
+    "dist-linux": "electron-builder -l"
   },
   "author": "Denis",
   "license": "ISC",
@@ -20,12 +24,19 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.61",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
     "@electron-forge/maker-zip": "^6.0.0-beta.61",
-    "electron": "^16.0.5"
+    "electron": "^16.0.5",
+    "electron-builder": "^22.14.5"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "kafkajs": "^1.15.0",
     "xlsx": "^0.17.4"
+  },
+  "buid": {
+    "appId": "id",
+    "mac": {},
+    "win": {},
+    "linux": {}
   },
   "config": {
     "forge": {
