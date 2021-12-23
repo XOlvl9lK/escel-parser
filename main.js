@@ -10,6 +10,8 @@ const createWindow = () => {
     }
   })
 
+  window.openDevTools();
+
   window.loadFile('index.html')
 }
 

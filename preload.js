@@ -1,17 +1,19 @@
-const exec = require('child_process').exec;
 const xlsx = require('xlsx')
+const Logger = require('./logger')
+const sendMessageToKafka = require('./kafka')
+const validateMessage = require('./validation')
 
 
 window.addEventListener('DOMContentLoaded', () => {
-  let path = '';
-  let disabled = true;
+  let path = ''
+  let disabled = true
 
   const input = document.querySelector('#field__file-2')
   const labelForInput = document.querySelector('.field__file-fake')
   const warning = document.querySelector('.warning')
   const initialText = labelForInput.innerText
 
-  input.addEventListener('change', (event) => {
+  input.addEventListener('change', () => {
     if (input?.files?.[0]?.path) {
       path = input.files[0].path
       let pathArr
@@ -28,6 +30,7 @@ window.addEventListener('DOMContentLoaded', () => {
       } else {
         disabled = true
         warning.innerText = 'Расширение файла должно быть xls или xlsx'
+        Logger.warn('Расширение файла должно быть xls или xlsx', 'FileInput')
       }
     } else {
       labelForInput.innerText = initialText
@@ -35,11 +38,19 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
   const button = document.getElementById('json')
-  button.addEventListener('click', () => {
+  button.addEventListener('click', async () => {
     if (!disabled) {
       const workbook = xlsx.readFile(path, { type: "file" })
-      let sheet_name_list = workbook.SheetNames;
-      console.log(xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]))
+      const sheet_name_list = workbook.SheetNames
+
+      const messagesArr = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+      for (let message of messagesArr) {
+        validateMessage(message)
+      }
+
+      Logger.log('Отправка сообщений')
+      await Promise.all(messagesArr.map(message => sendMessageToKafka(JSON.stringify(message), message.key)))
+      Logger.log('Отправка сообщений завершена')
     }
   })
 })
