@@ -1,16 +1,16 @@
-const { app, BrowserWindow } = require('electron')
-const path = require('path')
+import { app, BrowserWindow } from 'electron'
+import { join } from 'path'
 
 const createWindow = () => {
   const window = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: join(__dirname, 'preload.js')
     }
   })
 
-  window.loadFile('index.html')
+  window.loadFile(join(__dirname, '/index.html'))
 }
 
 app.whenReady().then(() => {

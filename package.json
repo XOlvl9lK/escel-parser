@@ -3,18 +3,16 @@
   "productName": "excel-parser",
   "version": "1.0.0",
   "description": "excel-parser",
-  "main": "main.js",
+  "main": "build/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron-forge start",
+    "start": "npm run clear:build && npm run compile && electron-forge start",
+
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "make-mac": "electron-forge make --platform darwin",
-    "make-linux": "electron-forge make --platform linux",
     "pack": "electron-builder --dir",
-    "dist-win": "electron-builder -w",
-    "dist-mac": "electron-builder -m",
-    "dist-linux": "electron-builder -l"
+
+    "compile": "tsc && copyfiles -f src/styles.css src/index.html build",
+    "clear:build": "rimraf build/*"
   },
   "author": "Denis",
   "license": "ISC",
@@ -25,11 +23,14 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.61",
     "@electron-forge/maker-zip": "^6.0.0-beta.61",
     "electron": "^16.0.5",
-    "electron-builder": "^22.14.5"
+    "electron-builder": "^22.14.5",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
+    "copyfiles": "^2.4.1",
     "electron-squirrel-startup": "^1.0.0",
     "kafkajs": "^1.15.0",
+    "typescript": "^4.5.4",
     "xlsx": "^0.17.4"
   },
   "buid": {
