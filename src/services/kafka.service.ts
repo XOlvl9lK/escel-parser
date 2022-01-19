@@ -4,11 +4,12 @@ import {ValidatedRow} from "./validation.service";
 
 export class KafkaService {
   private static instance: KafkaService
-  private logger = LoggerService.getInstance()
+  private logger;
   private kafka: Kafka
   private producer: Producer
 
-  private constructor() {
+  private constructor(pathToLogs: string) {
+    this.logger = LoggerService.getInstance(pathToLogs)
     this.kafka = new Kafka({
       clientId: 'EMIAS.DN.DNPDN',
       brokers: ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092']
@@ -16,9 +17,9 @@ export class KafkaService {
     this.producer = this.kafka.producer()
   }
 
-  static getInstance(): KafkaService {
+  static getInstance(pathToLogs: string): KafkaService {
     if (!KafkaService.instance) {
-      KafkaService.instance = new KafkaService()
+      KafkaService.instance = new KafkaService(pathToLogs)
     }
     return KafkaService.instance
   }

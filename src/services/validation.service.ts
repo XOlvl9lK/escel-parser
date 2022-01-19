@@ -26,10 +26,12 @@ export class ValidationService {
   ]
   private diagnosesRegexp = /\D\d\d\.\d/i
   private dateRegexp = /\d{4}(-)\d{2}(-)\d{2}/i
-  private logger = LoggerService.getInstance()
+  private logger
   private errors: string[] = []
 
-  constructor() {}
+  constructor(pathToLogs: string) {
+    this.logger = LoggerService.getInstance(pathToLogs)
+  }
 
   validateRow(row: ExcelRow): ValidatedRow {
     this.differenceInKeys(Object.keys(row))

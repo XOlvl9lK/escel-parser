@@ -1,5 +1,8 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { initialize, enable } from '@electron/remote/main'
+
+initialize()
 
 const createWindow = () => {
   const window = new BrowserWindow({
@@ -9,15 +12,19 @@ const createWindow = () => {
       preload: join(__dirname, 'preload.js')
     }
   })
+  enable(window.webContents)
 
-  window.loadFile(join(__dirname, '/index.html'))
+  window.loadFile(join(__dirname, '../index.html'))
 }
 
 app.whenReady().then(() => {
   createWindow()
 
+  console.log(app.getAppPath())
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    console.log(app.getAppPath())
   })
 })
 

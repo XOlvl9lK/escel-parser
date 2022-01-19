@@ -1,6 +1,6 @@
-import path from "path";
-import { writeFileSync, existsSync, appendFileSync } from 'fs'
-import { EOL } from 'os'
+import {join} from "path";
+import {appendFileSync, existsSync, readFileSync, unlinkSync, writeFileSync} from 'fs'
+import {EOL} from 'os'
 
 export class LogLine {
   status: 'Запись обработана успешно' | 'Запись не обработана';
@@ -26,23 +26,47 @@ export class LogLine {
 
 export class LoggerService {
   private static instance: LoggerService
-  private pathToFile = path.join(__dirname, 'logs.csv')
+  private readonly pathToFile: string
 
-  private constructor() {
+  private constructor(pathToLogs: string) {
+    this.pathToFile = pathToLogs
     if (!existsSync(this.pathToFile)) {
       const firstLine = 'Статус;Данные Пациента;Текст ошибки;Дата и время записи'
       writeFileSync(this.pathToFile, firstLine)
     }
   }
 
-  static getInstance(): LoggerService {
+  static getInstance(pathToLogs: string): LoggerService {
     if (!LoggerService.instance) {
-      LoggerService.instance = new LoggerService()
+      LoggerService.instance = new LoggerService(pathToLogs)
     }
     return LoggerService.instance
   }
 
   writeLine(line: LogLine) {
+    console.log(this.pathToFile)
     appendFileSync(this.pathToFile, `${EOL}${line.status};${line.patientData};${line.errors || ''};${line.date.toISOString()}`)
+  }
+}
+
+export class LogsPath {
+  private pathToLogs: string;
+  private readonly pathToConfig: string = join(__dirname, 'config.txt')
+  private slash = process.platform === 'linux' || process.platform === 'darwin' ? '/' : '\\'
+
+  constructor(path: string) {
+    if (!existsSync(this.pathToConfig)) {
+      writeFileSync(this.pathToConfig, path + this.slash + 'logs.csv')
+    }
+    this.pathToLogs = path + 'logs.csv'
+  }
+
+  changePath(path: string) {
+    unlinkSync(this.pathToConfig)
+    writeFileSync(this.pathToConfig, path + this.slash + 'logs.csv')
+  }
+
+  getPath() {
+    return readFileSync(this.pathToConfig, 'utf8')
   }
 }

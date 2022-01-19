@@ -8,7 +8,7 @@ body {
   width: 100%;
   text-align: center;
   text-decoration: underline;
-  margin-top: 100px;
+  margin-top: 50px;
 }
 
 div {
@@ -108,4 +108,25 @@ div {
   justify-content: center;
   border-radius: 0 3px 3px 0;
   cursor: pointer;
+}
+
+.path-to-logs {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.path-to-logs p {
+  text-align: center;
+  margin: 0 15px;
+}
+
+.path-to-logs button {
+  margin-top: 10px;
+}
+
+#path-to-logs {
+  margin-top: 10px;
 }
