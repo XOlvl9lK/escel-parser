@@ -39,12 +39,12 @@ export class ValidationService {
     !row.firstName && this.errors.push('Имя пациента не указано')
     !this.possibleGender.includes(row.gender || '') && this.errors.push(`Пол не определён: ${row.gender}`)
     !row.birthDate && this.errors.push('Дата рождения не указана')
-    row.birthDate && this.dateFormatValidation(row.birthDate)
+    row.birthDate && this.dateFormatValidation(row.birthDate, 'Дата рождения')
     !row.policyNumber && this.errors.push('Полис ОМС не указан')
     !row.diagnoses && this.errors.push('Диагнозы не указаны')
     row.diagnoses && this.diagnosesValidation(row.diagnoses)
     !row.pdnStartDate && this.errors.push('Дата начала действия ПДН не передана')
-    row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate)
+    row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate, 'Дата начала действия ПДН')
 
     const validatedRow = {
       ...row,
@@ -85,8 +85,8 @@ export class ValidationService {
     }
   }
 
-  private dateFormatValidation(date: string) {
-    !date.match(this.dateRegexp) && this.errors.push(`Дата рождения. Не соответствует формат данных: ${date}`)
+  private dateFormatValidation(date: string, context: string) {
+    !date.match(this.dateRegexp) && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
   }
 
   private diagnosesToArray(diagnoses: string) {
