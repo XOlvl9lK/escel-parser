@@ -24,7 +24,22 @@ export class KafkaService {
     return KafkaService.instance
   }
 
-  async sendMessage(topic: string, message: string, key: string): Promise<void> {
+  async sendMessage(topic: string, row: ValidatedRow, key: string): Promise<void> {
+    const patientData = row.policyNumber || row.lastName + ' ' + row.firstName + ' ' + row.middleName
+    const message = JSON.stringify({
+      lastName: row.lastName,
+      firstName: row.firstName,
+      middleName: row.middleName,
+      gender: row.gender,
+      birthDate: row.birthDate,
+      policyNumber: row.policyNumber,
+      pdnStartDate: row.pdnStartDate
+    })
+    if (row.errors.length) {
+      const logLine = LogLine.getUnsuccessfulLine(patientData, message, row.errors.join('. '))
+      this.logger.writeLine(logLine)
+      return
+    }
     try {
       await this.producer.connect()
       await this.producer.send({
@@ -33,10 +48,10 @@ export class KafkaService {
           { value: message, key }
         ]
       })
+      const logLine = LogLine.getSuccessfulLine(patientData, message)
+      this.logger.writeLine(logLine)
     } catch (e: any) {
-      const row = JSON.parse(message) as ValidatedRow
-      const patientData = row.policyNumber || row.lastName + ' ' + row.firstName + ' ' + row.middleName
-      const logLine = LogLine.getUnsuccessfulLine(patientData, e.message || '')
+      const logLine = LogLine.getUnsuccessfulLine(patientData, JSON.stringify(message), 'Техническая ошибка при отправке сообщения' + ' ' + (e?.message || '') + ' ' + (e?.stack || ''))
       this.logger.writeLine(logLine)
     }
   }

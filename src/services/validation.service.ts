@@ -4,7 +4,8 @@ import {LoggerService, LogLine} from "./logger.service";
 export interface ValidatedRow extends Row {
   key?: string;
   timestamp: number;
-  diagnoses?: string[]
+  diagnoses?: string[];
+  errors: string[]
 }
 
 export class ValidationService {
@@ -25,7 +26,7 @@ export class ValidationService {
     'f'
   ]
   private diagnosesRegexp = /\D\d\d\.\d/i
-  private dateRegexp = /\d{4}(-)\d{2}(-)\d{2}/i
+  private dateRegexp = /\d{2}(.)\d{2}(.)\d{4}/i
   private logger
   private errors: string[] = []
 
@@ -40,35 +41,23 @@ export class ValidationService {
     !this.possibleGender.includes(row.gender || '') && this.errors.push(`Пол не определён: ${row.gender}`)
     !row.birthDate && this.errors.push('Дата рождения не указана')
     row.birthDate && this.dateFormatValidation(row.birthDate, 'Дата рождения')
+    row.birthDate = this.convertDateFormat(row.birthDate)
     !row.policyNumber && this.errors.push('Полис ОМС не указан')
     !row.diagnoses && this.errors.push('Диагнозы не указаны')
     row.diagnoses && this.diagnosesValidation(row.diagnoses)
     !row.pdnStartDate && this.errors.push('Дата начала действия ПДН не передана')
     row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate, 'Дата начала действия ПДН')
+    row.pdnStartDate = this.convertDateFormat(row.pdnStartDate)
 
     const validatedRow = {
       ...row,
       diagnoses: this.diagnosesToArray(row.diagnoses || ''),
       key: row.policyNumber,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      errors: this.errors
     }
-
-    this.logger.writeLine(this.convertToLogLine(validatedRow))
 
     return validatedRow
-  }
-
-  anyErrors() {
-    return !!this.errors.length
-  }
-
-  convertToLogLine(row: ValidatedRow): LogLine {
-    const patientData = row.policyNumber || row.lastName + ' ' + row.firstName + ' ' + row.middleName
-    if (this.anyErrors()) {
-      return LogLine.getUnsuccessfulLine(patientData, this.errors.join('. '))
-    } else {
-      return LogLine.getSuccessfulLine(patientData)
-    }
   }
 
   private differenceInKeys(keys: string[]) {
@@ -87,6 +76,16 @@ export class ValidationService {
 
   private dateFormatValidation(date: string, context: string) {
     !date.match(this.dateRegexp) && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+  }
+
+  private convertDateFormat(date?: string) {
+    if (date) {
+      if (date.match(this.dateRegexp)) {
+        return date.split('.').reverse().join('-')
+      } else {
+        return date
+      }
+    }
   }
 
   private diagnosesToArray(diagnoses: string) {

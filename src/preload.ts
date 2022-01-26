@@ -59,9 +59,7 @@ window.addEventListener('DOMContentLoaded', () => {
       messagesArr.forEach(row => {
         const validation = new ValidationService(pathObject.getPath())
         const validatedRow = validation.validateRow(row)
-        if (!validation.anyErrors()) {
-          KafkaService.getInstance(pathObject.getPath()).sendMessage('dnPatient', JSON.stringify(validatedRow), validatedRow.key || '')
-        }
+        KafkaService.getInstance(pathObject.getPath()).sendMessage('dnPatient', validatedRow, validatedRow.key || '')
       })
     }
   })

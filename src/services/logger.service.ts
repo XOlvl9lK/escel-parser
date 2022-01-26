@@ -3,24 +3,26 @@ import {appendFileSync, existsSync, readFileSync, unlinkSync, writeFileSync} fro
 import {EOL} from 'os'
 
 export class LogLine {
-  status: 'Запись обработана успешно' | 'Запись не обработана';
+  status: string;
   patientData: string;
   errors?: string;
+  message: string;
   date: Date;
 
-  private constructor(status: 'Запись обработана успешно' | 'Запись не обработана', patientData: string, date: Date, errors?: string) {
+  private constructor(status: string, patientData: string, date: Date, message: string, errors?: string) {
     this.status = status
     this.patientData = patientData
     this.date = date
+    this.message = message
     this.errors = errors
   }
 
-  static getSuccessfulLine(patientData: string) {
-    return new LogLine('Запись обработана успешно', patientData, new Date)
+  static getSuccessfulLine(patientData: string, message: string) {
+    return new LogLine('Отправлено в ЕСУ', patientData, new Date, message)
   }
 
-  static getUnsuccessfulLine(patientData: string, errors?: string) {
-    return new LogLine('Запись не обработана', patientData, new Date(), errors)
+  static getUnsuccessfulLine(patientData: string, message: string, errors?: string) {
+    return new LogLine('Не отправлено в ЕСУ', patientData, new Date(), message, errors)
   }
 }
 
@@ -31,7 +33,7 @@ export class LoggerService {
   private constructor(pathToLogs: string) {
     this.pathToFile = pathToLogs
     if (!existsSync(this.pathToFile)) {
-      const firstLine = 'Статус;Данные Пациента;Текст ошибки;Дата и время записи'
+      const firstLine = 'Статус;Данные Пациента;Причина ошибки;Запись;Дата и время записи'
       writeFileSync(this.pathToFile, firstLine)
     }
   }
@@ -45,7 +47,7 @@ export class LoggerService {
 
   writeLine(line: LogLine) {
     console.log(this.pathToFile)
-    appendFileSync(this.pathToFile, `${EOL}${line.status};${line.patientData};${line.errors || ''};${line.date.toISOString()}`)
+    appendFileSync(this.pathToFile, `${EOL}${line.status};${line.patientData};${line.errors || ''};${line.message};${line.date.toISOString()}`)
   }
 }
 
