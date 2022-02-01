@@ -7,7 +7,7 @@ import {LogsPath} from "./services/logger.service";
 window.addEventListener('DOMContentLoaded', () => {
   let path = ''
   let disabled = true
-  let settings = KafkaSettings.createProdSettings()
+  let settings = KafkaSettings.createPPAKSettings()
   const pathObject = new LogsPath(app.getAppPath())
 
   const input = document.querySelector('#field__file-2') as HTMLInputElement
@@ -24,11 +24,11 @@ window.addEventListener('DOMContentLoaded', () => {
   settingsSelect.addEventListener('change', (e: Event) => {
     const value = (e?.target as HTMLSelectElement).value as KafkaSettingsEnum
     switch (value) {
-      case KafkaSettingsEnum.PROD:
-        settings = KafkaSettings.createProdSettings()
+      case KafkaSettingsEnum.PPAK:
+        settings = KafkaSettings.createPPAKSettings()
         break
-      case KafkaSettingsEnum.PREPROD:
-        settings = KafkaSettings.createPreProdSettings()
+      case KafkaSettingsEnum.TEST:
+        settings = KafkaSettings.createTestSettings()
         break
       default:
         break

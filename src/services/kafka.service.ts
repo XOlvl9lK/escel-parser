@@ -16,6 +16,7 @@ export class KafkaService {
 
   static getInstance(pathToLogs: string, settings: KafkaSettings): KafkaService {
     if (!KafkaService.instance) {
+      console.log(settings)
       KafkaService.instance = new KafkaService(pathToLogs, settings)
     }
     return KafkaService.instance
@@ -30,7 +31,8 @@ export class KafkaService {
       gender: row.gender,
       birthDate: row.birthDate,
       policyNumber: row.policyNumber,
-      pdnStartDate: row.pdnStartDate
+      pdnStartDate: row.pdnStartDate,
+      diagnoses: row.diagnoses
     })
     if (row.errors.length) {
       const logLine = LogLine.getUnsuccessfulLine(patientData, message, row.errors.join('. '))
@@ -70,16 +72,16 @@ export class KafkaSettings {
     }
   }
 
-  static createProdSettings() {
-    return new KafkaSettings('PROD', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
+  static createPPAKSettings() {
+    return new KafkaSettings('EMIAS.DN.PDN.A', ['srv-pesu-zk01:2181', 'srv-pesu-zk02:2181', 'srv-pesu-zk03:2181'])
   }
 
-  static createPreProdSettings() {
-    return new KafkaSettings('EMIAS.DN.DNPDN', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
+  static createTestSettings() {
+    return new KafkaSettings('EMIAS.DN.PDN.A', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
   }
 }
 
 export enum KafkaSettingsEnum {
-  PROD = 'прод',
-  PREPROD = 'препрод'
+  TEST = 'тест',
+  PPAK = 'ппак'
 }

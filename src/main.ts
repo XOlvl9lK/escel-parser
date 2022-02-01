@@ -14,8 +14,6 @@ const createWindow = () => {
   })
   enable(window.webContents)
 
-  //@ts-ignore
-  window.openDevTools()
   window.loadFile(join(__dirname, '../index.html'))
 }
 
