@@ -1,0 +1,154 @@
+body {
+  background-color: #F9F9ED;
+  color: #0A090C;
+  font-family: 'Roboto', sans-serif;
+}
+
+.header {
+  width: 100%;
+  text-align: center;
+  text-decoration: underline;
+  margin-top: 30px;
+}
+
+div {
+  margin-bottom: 25px;
+}
+
+.button-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  height: 50px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #0197F6;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.button:hover {
+  box-shadow: 5px 0 15px #a1d0ef, -5px 0 15px #a1d0ef;
+}
+
+.warning {
+  display: flex;
+  justify-content: center;
+  height: 20px;
+  color: red;
+  font-weight: bold;
+}
+
+.field__wrapper {
+  width: 100%;
+  position: relative;
+  margin-top: 50px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.field__file {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+}
+
+.field__file-wrapper {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.field__file-fake {
+  height: 60px;
+  width: 300px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 0 15px;
+  border: 1px solid #c7c7c7;
+  border-radius: 3px 0 0 3px;
+  border-right: none;
+  cursor: pointer;
+}
+
+.field__file-button {
+  width: 130px;
+  height: 60px;
+  background: #1bbc9b;
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 700;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  border-radius: 0 3px 3px 0;
+  cursor: pointer;
+}
+
+.path-to-logs {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.path-to-logs p {
+  text-align: center;
+  margin: 0 15px;
+}
+
+.path-to-logs button {
+  margin-top: 10px;
+}
+
+#path-to-logs {
+  margin-top: 10px;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 110px;
+}
+
+.settings label {
+  font-size: 12px;
+}
+
+.settings select {
+  border: 1px solid #c7c7c7;
+  height: 20px;
+  width: 100%;
+}
+
+.settings select:focus {
+  outline: none;
+}
