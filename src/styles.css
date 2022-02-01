@@ -8,7 +8,7 @@ body {
   width: 100%;
   text-align: center;
   text-decoration: underline;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 div {
@@ -129,4 +129,26 @@ div {
 
 #path-to-logs {
   margin-top: 10px;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 110px;
+}
+
+.settings label {
+  font-size: 12px;
+}
+
+.settings select {
+  border: 1px solid #c7c7c7;
+  height: 20px;
+  width: 100%;
+}
+
+.settings select:focus {
+  outline: none;
 }

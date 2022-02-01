@@ -8,18 +8,15 @@ export class KafkaService {
   private kafka: Kafka
   private producer: Producer
 
-  private constructor(pathToLogs: string) {
+  private constructor(pathToLogs: string, settings: KafkaSettings) {
     this.logger = LoggerService.getInstance(pathToLogs)
-    this.kafka = new Kafka({
-      clientId: 'EMIAS.DN.DNPDN',
-      brokers: ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092']
-    })
+    this.kafka = new Kafka(settings.getSettings())
     this.producer = this.kafka.producer()
   }
 
-  static getInstance(pathToLogs: string): KafkaService {
+  static getInstance(pathToLogs: string, settings: KafkaSettings): KafkaService {
     if (!KafkaService.instance) {
-      KafkaService.instance = new KafkaService(pathToLogs)
+      KafkaService.instance = new KafkaService(pathToLogs, settings)
     }
     return KafkaService.instance
   }
@@ -55,4 +52,34 @@ export class KafkaService {
       this.logger.writeLine(logLine)
     }
   }
+}
+
+export class KafkaSettings {
+  clientId: string
+  brokers: string[]
+
+  private constructor(clientId: string, brokers: string[]) {
+    this.clientId = clientId
+    this.brokers = brokers
+  }
+
+  getSettings() {
+    return {
+      clientId: this.clientId,
+      brokers: this.brokers
+    }
+  }
+
+  static createProdSettings() {
+    return new KafkaSettings('PROD', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
+  }
+
+  static createPreProdSettings() {
+    return new KafkaSettings('EMIAS.DN.DNPDN', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
+  }
+}
+
+export enum KafkaSettingsEnum {
+  PROD = 'прод',
+  PREPROD = 'препрод'
 }

@@ -26,7 +26,7 @@ export class ValidationService {
     'f'
   ]
   private diagnosesRegexp = /\D\d\d\.\d/i
-  private dateRegexp = /\d{2}(.)\d{2}(.)\d{4}/i
+  private dateRegexp = /\d{2}\.\d{2}\.\d{4}/i
   private logger
   private errors: string[] = []
 
@@ -75,7 +75,9 @@ export class ValidationService {
   }
 
   private dateFormatValidation(date: string, context: string) {
-    !date.match(this.dateRegexp) && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+    const match = date.match(this.dateRegexp)
+    if (!match) return this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+    match?.index !== 0 && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
   }
 
   private convertDateFormat(date?: string) {

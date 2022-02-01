@@ -46,7 +46,6 @@ export class LoggerService {
   }
 
   writeLine(line: LogLine) {
-    console.log(this.pathToFile)
     appendFileSync(this.pathToFile, `${EOL}${line.status};${line.patientData};${line.errors || ''};${line.message};${line.date.toISOString()}`)
   }
 }

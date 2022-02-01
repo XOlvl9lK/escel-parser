@@ -1,12 +1,13 @@
 import {ExcelService} from "./services/excel.service";
 import {ValidationService} from "./services/validation.service";
-import {KafkaService} from "./services/kafka.service";
+import { KafkaService, KafkaSettings, KafkaSettingsEnum } from "./services/kafka.service";
 import { app, dialog } from '@electron/remote'
 import {LogsPath} from "./services/logger.service";
 
 window.addEventListener('DOMContentLoaded', () => {
   let path = ''
   let disabled = true
+  let settings = KafkaSettings.createProdSettings()
   const pathObject = new LogsPath(app.getAppPath())
 
   const input = document.querySelector('#field__file-2') as HTMLInputElement
@@ -15,9 +16,24 @@ window.addEventListener('DOMContentLoaded', () => {
   const button = document.getElementById('json') as HTMLButtonElement
   const changeButton = document.querySelector('#change-logs-path') as HTMLButtonElement
   const pathToLogs = document.querySelector('#path-to-logs') as HTMLParagraphElement
+  const settingsSelect = document.querySelector('#settings') as HTMLSelectElement
 
   pathToLogs.innerText = pathObject.getPath()
   const initialText = labelForInput?.innerText
+
+  settingsSelect.addEventListener('change', (e: Event) => {
+    const value = (e?.target as HTMLSelectElement).value as KafkaSettingsEnum
+    switch (value) {
+      case KafkaSettingsEnum.PROD:
+        settings = KafkaSettings.createProdSettings()
+        break
+      case KafkaSettingsEnum.PREPROD:
+        settings = KafkaSettings.createPreProdSettings()
+        break
+      default:
+        break
+    }
+  })
 
   changeButton.addEventListener('click', () => {
     dialog.showOpenDialog({
@@ -54,12 +70,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
   button.addEventListener('click', async () => {
+    console.log(settings.getSettings())
     if (!disabled) {
       const messagesArr = ExcelService.convertToJSON(path)
       messagesArr.forEach(row => {
         const validation = new ValidationService(pathObject.getPath())
         const validatedRow = validation.validateRow(row)
-        KafkaService.getInstance(pathObject.getPath()).sendMessage('dnPatient', validatedRow, validatedRow.key || '')
+        KafkaService.getInstance(
+          pathObject.getPath(),
+          settings
+        ).sendMessage('dnPatient', validatedRow, validatedRow.key || '')
       })
     }
   })
