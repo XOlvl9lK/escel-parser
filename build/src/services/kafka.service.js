@@ -74,7 +74,7 @@ class KafkaSettings {
         };
     }
     static createPPAKSettings() {
-        return new KafkaSettings('EMIAS.DN.PDN.A', ['srv-pesu-zk01:2181', 'srv-pesu-zk02:2181', 'srv-pesu-zk03:2181']);
+        return new KafkaSettings('EMIAS.DN.PDN.A', ['srv-pesu-kaf01:9092', 'srv-pesu-kaf02:9092', 'srv-pesu-kaf03:9092']);
     }
     static createTestSettings() {
         return new KafkaSettings('EMIAS.DN.PDN.A', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092']);
