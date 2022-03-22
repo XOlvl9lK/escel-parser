@@ -8,6 +8,13 @@ export interface ValidatedRow extends Row {
   errors: string[]
 }
 
+export interface RowForSending {
+  patientData: string
+  message: string
+  errors: string[]
+  key?: string
+}
+
 export class ValidationService {
   private possibleKeys = [
     'lastName',
@@ -58,6 +65,36 @@ export class ValidationService {
     }
 
     return validatedRow
+  }
+
+  prepareForSending(rows: ValidatedRow[]): RowForSending[] {
+    return rows.map(row => {
+      const patientData = row.policyNumber || row.lastName + ' ' + row.firstName + ' ' + row.middleName
+      const message = JSON.stringify({
+        lastName: row.lastName,
+        firstName: row.firstName,
+        middleName: row.middleName,
+        gender: row.gender,
+        birthDate: row.birthDate,
+        policyNumber: row.policyNumber,
+        pdnStartDate: row.pdnStartDate,
+        diagnoses: row.diagnoses
+      })
+      return {
+        patientData,
+        message,
+        errors: row.errors,
+        key: row.policyNumber
+      }
+    }).filter(row => {
+      if (row.errors.length) {
+        const logLine = LogLine.getUnsuccessfulLine(row.patientData, row.message, row.errors.join('. '))
+        this.logger.writeLine(logLine)
+        return false
+      } else {
+        return true
+      }
+    })
   }
 
   private differenceInKeys(keys: string[]) {

@@ -1,6 +1,6 @@
 import {Kafka, Producer} from "kafkajs";
 import {LoggerService, LogLine} from "./logger.service";
-import {ValidatedRow} from "./validation.service";
+import { RowForSending } from "./validation.service";
 
 export class KafkaService {
   private static instance: KafkaService
@@ -16,47 +16,31 @@ export class KafkaService {
 
   static getInstance(pathToLogs: string, settings: KafkaSettings): KafkaService {
     if (!KafkaService.instance) {
-      console.log(settings)
       KafkaService.instance = new KafkaService(pathToLogs, settings)
     }
     return KafkaService.instance
   }
 
-  async sendMessage(topic: string, rows: ValidatedRow[]): Promise<void> {
-    const messages = rows.map(row => {
-      const patientData = row.policyNumber || row.lastName + ' ' + row.firstName + ' ' + row.middleName
-      const message = JSON.stringify({
-        lastName: row.lastName,
-        firstName: row.firstName,
-        middleName: row.middleName,
-        gender: row.gender,
-        birthDate: row.birthDate,
-        policyNumber: row.policyNumber,
-        pdnStartDate: row.pdnStartDate,
-        diagnoses: row.diagnoses
-      })
-      if (row.errors.length) {
-        const logLine = LogLine.getUnsuccessfulLine(patientData, message, row.errors.join('. '))
-        this.logger.writeLine(logLine)
-      } else {
-        return {
-          value: message,
-          key: row.policyNumber
-        }
-      }
-    }).filter(m => !!m)
+  async sendMessage(topic: string, rows: RowForSending[]): Promise<void> {
+    const messages = rows.map(r => ({
+      value: r.message,
+      key: r.key
+    }))
     try {
       await this.producer.connect()
       await this.producer.send({
         topic,
-        //@ts-ignore
         messages
       })
-      // const logLine = LogLine.getSuccessfulLine(patientData, message)
-      // this.logger.writeLine(logLine)
+      rows.forEach(r => {
+        const logLine = LogLine.getSuccessfulLine(r.patientData, r.message)
+        this.logger.writeLine(logLine)
+      })
     } catch (e: any) {
-      // const logLine = LogLine.getUnsuccessfulLine(patientData, JSON.stringify(message), 'Техническая ошибка при отправке сообщения' + ' ' + (e?.message || '') + ' ' + (e?.stack || ''))
-      // this.logger.writeLine(logLine)
+      rows.forEach(r => {
+        const logLine = LogLine.getUnsuccessfulLine(r.patientData, JSON.stringify(r.message), 'Техническая ошибка при отправке сообщения' + ' ' + (e?.message || '') + ' ' + (e?.stack || ''))
+        this.logger.writeLine(logLine)
+      })
     }
   }
 }

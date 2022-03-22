@@ -19,6 +19,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let disabled = true;
     let settings = kafka_service_1.KafkaSettings.createPPAKSettings();
     const pathObject = new logger_service_1.LogsPath(remote_1.app.getAppPath());
+    const chunkSize = 4000;
     const input = document.querySelector('#field__file-2');
     const labelForInput = document.querySelector('.field__file-fake');
     const warning = document.querySelector('.warning');
@@ -77,14 +78,20 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
     button.addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(settings.getSettings());
+        console.log('start');
+        console.time('kafka');
         if (!disabled) {
+            const kafka = kafka_service_1.KafkaService.getInstance(pathObject.getPath(), settings);
+            const validation = new validation_service_1.ValidationService(pathObject.getPath());
             const messagesArr = excel_service_1.ExcelService.convertToJSON(path);
-            messagesArr.forEach(row => {
-                const validation = new validation_service_1.ValidationService(pathObject.getPath());
-                const validatedRow = validation.validateRow(row);
-                kafka_service_1.KafkaService.getInstance(pathObject.getPath(), settings).sendMessage('dnPatient', validatedRow, validatedRow.key || '');
-            });
+            const validatedRows = messagesArr.map(m => validation.validateRow(m));
+            const rowsForSending = validation.prepareForSending(validatedRows);
+            for (let i = 0; i < rowsForSending.length; i += chunkSize) {
+                const chunk = rowsForSending.slice(i, i + chunkSize);
+                yield kafka.sendMessage('dnPatient', chunk);
+            }
         }
+        console.timeEnd('kafka');
+        console.log('finish');
     }));
 });

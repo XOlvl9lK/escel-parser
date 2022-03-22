@@ -49,7 +49,9 @@ class LogsPath {
         this.pathToLogs = path + 'logs.csv';
     }
     changePath(path) {
-        (0, fs_1.unlinkSync)(this.pathToConfig);
+        if ((0, fs_1.existsSync)(this.pathToConfig)) {
+            (0, fs_1.unlinkSync)(this.pathToConfig);
+        }
         (0, fs_1.writeFileSync)(this.pathToConfig, path + this.slash + 'logs.csv');
     }
     getPath() {

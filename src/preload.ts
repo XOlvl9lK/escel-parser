@@ -1,5 +1,5 @@
 import {ExcelService} from "./services/excel.service";
-import {ValidationService} from "./services/validation.service";
+import { ValidatedRow, ValidationService } from "./services/validation.service";
 import { KafkaService, KafkaSettings, KafkaSettingsEnum } from "./services/kafka.service";
 import { app, dialog } from '@electron/remote'
 import {LogsPath} from "./services/logger.service";
@@ -9,6 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let disabled = true
   let settings = KafkaSettings.createPPAKSettings()
   const pathObject = new LogsPath(app.getAppPath())
+  const chunkSize = 4000
 
   const input = document.querySelector('#field__file-2') as HTMLInputElement
   const labelForInput = document.querySelector('.field__file-fake') as HTMLLabelElement
@@ -80,7 +81,11 @@ window.addEventListener('DOMContentLoaded', () => {
       const validation = new ValidationService(pathObject.getPath())
       const messagesArr = ExcelService.convertToJSON(path)
       const validatedRows = messagesArr.map(m => validation.validateRow(m))
-      await kafka.sendMessage('dnPatient', validatedRows)
+      const rowsForSending = validation.prepareForSending(validatedRows)
+      for (let i = 0; i < rowsForSending.length; i += chunkSize) {
+        const chunk = rowsForSending.slice(i, i + chunkSize)
+        await kafka.sendMessage('dnPatient', chunk)
+      }
     }
     console.timeEnd('kafka')
     console.log('finish')
