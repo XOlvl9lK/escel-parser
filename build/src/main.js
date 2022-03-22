@@ -13,6 +13,8 @@ const createWindow = () => {
         }
     });
     (0, main_1.enable)(window.webContents);
+    //@ts-ignore
+    window.openDevTools();
     window.loadFile((0, path_1.join)(__dirname, '../index.html'));
 };
 electron_1.app.whenReady().then(() => {

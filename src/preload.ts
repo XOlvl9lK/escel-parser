@@ -70,17 +70,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
   button.addEventListener('click', async () => {
-    console.log(settings.getSettings())
+    console.log('start')
+    console.time('kafka')
     if (!disabled) {
+      const kafka = KafkaService.getInstance(
+        pathObject.getPath(),
+        settings
+      )
+      const validation = new ValidationService(pathObject.getPath())
       const messagesArr = ExcelService.convertToJSON(path)
-      messagesArr.forEach(row => {
-        const validation = new ValidationService(pathObject.getPath())
-        const validatedRow = validation.validateRow(row)
-        KafkaService.getInstance(
-          pathObject.getPath(),
-          settings
-        ).sendMessage('dnPatient', validatedRow, validatedRow.key || '')
-      })
+      const validatedRows = messagesArr.map(m => validation.validateRow(m))
+      await kafka.sendMessage('dnPatient', validatedRows)
     }
+    console.timeEnd('kafka')
+    console.log('finish')
   })
 })
