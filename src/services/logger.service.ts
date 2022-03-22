@@ -63,7 +63,9 @@ export class LogsPath {
   }
 
   changePath(path: string) {
-    unlinkSync(this.pathToConfig)
+    if (existsSync(this.pathToConfig)) {
+      unlinkSync(this.pathToConfig)
+    }
     writeFileSync(this.pathToConfig, path + this.slash + 'logs.csv')
   }
 
