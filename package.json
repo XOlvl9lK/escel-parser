@@ -1,7 +1,7 @@
 {
   "name": "excel-parser",
   "productName": "excel-parser",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "excel-parser",
   "main": "build/src/main.js",
   "scripts": {

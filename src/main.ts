@@ -29,40 +29,42 @@ app.whenReady().then(async () => {
     kafkaSettings = KafkaSettings.createPPAKSettings()
   }
 
-  if (path) {
-    if (!existsSync(path)) {
-      console.log('File not found')
-      console.log('Exit app')
-      app.quit()
-    } else {
-      console.log('File found')
-      const pathObject = new LogsPath(app.getAppPath())
-      const chunkSize = 4000
-      const validation = new ValidationService(pathObject.getPath())
-      const messagesArr = ExcelService.convertToJSON(path)
-      const validatedRows = messagesArr.map(m => validation.validateRow(m))
-      const rowsForSending = validation.prepareForSending(validatedRows)
-      const kafka = KafkaService.getInstance(
-        pathObject.getPath(),
-        kafkaSettings
-      )
-      for (let i = 0; i < rowsForSending.length; i += chunkSize) {
-        const chunk = rowsForSending.slice(i, i + chunkSize)
-        await kafka.sendMessage('dnPatient', chunk)
+  try {
+    if (path) {
+      if (!existsSync(path)) {
+        console.log('File not found')
+        console.log('Exit app')
+        app.quit()
+      } else {
+        console.log('File found')
+        const pathObject = new LogsPath(app.getAppPath())
+        const chunkSize = 4000
+        const validation = new ValidationService(pathObject.getPath())
+        const messagesArr = ExcelService.convertToJSON(path)
+        const validatedRows = messagesArr.map(m => validation.validateRow(m))
+        const rowsForSending = validation.prepareForSending(validatedRows)
+        const kafka = KafkaService.getInstance(
+          pathObject.getPath(),
+          kafkaSettings
+        )
+        for (let i = 0; i < rowsForSending.length; i += chunkSize) {
+          const chunk = rowsForSending.slice(i, i + chunkSize)
+          await kafka.sendMessage('dnPatient', chunk)
+        }
+        console.log('Messages sent')
+        console.log('Logs available at')
+        console.log(pathObject.getPath())
+        console.log('Exit app')
+        app.quit()
       }
-      console.log('Messages sent')
-      console.log('Logs available at')
-      console.log(pathObject.getPath())
-      console.log('Exit app')
+    } else {
+      console.log('Path not specified')
+      console.log('Exit App')
       app.quit()
     }
-  } else {
-    console.log('Path not specified')
-    console.log('Exit app')
+  } catch (e) {
+    console.log('App crash')
+    console.log('Exit App')
     app.quit()
   }
-})
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
 })
