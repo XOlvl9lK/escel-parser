@@ -10,8 +10,16 @@ import { hideBin } from "yargs/helpers";
 app.whenReady().then(async () => {
   console.log('App started')
   const argv = yargs(hideBin(process.argv)).argv as Arguments<{ path?: string, settings?: string }>
-  const path = argv.path
-  const settings = argv.settings
+  let path: string | undefined
+  let settings: string | undefined
+  if (process.platform === 'linux') {
+    const [pathArg, settingsArg] = argv._ as string[]
+    path = pathArg?.split('=')?.[1]
+    settings = settingsArg?.split('=')?.[1]
+  } else {
+    path = argv.path
+    settings = argv.settings
+  }
   let kafkaSettings: KafkaSettings
   if (settings && ['test', 'ppak'].includes(settings.toLowerCase())) {
     console.log(`Creating ${settings} settings`)
