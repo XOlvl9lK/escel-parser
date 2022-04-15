@@ -112,9 +112,12 @@ export class ValidationService {
   }
 
   private dateFormatValidation(date: string, context: string) {
-    const match = date?.match(this.dateRegexp)
-    if (!match) return this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
-    match?.index !== 0 && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+    if (date) {
+      const match = date.match(this.dateRegexp)
+      if (!match) return this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+      match?.index !== 0 && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+    }
+    this.errors.push(`${context}. Не соответствует формат данных`)
   }
 
   private convertDateFormat(date?: string) {
