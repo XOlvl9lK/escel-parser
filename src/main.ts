@@ -64,6 +64,7 @@ app.whenReady().then(async () => {
     }
   } catch (e) {
     console.log('App crash')
+    console.log(e)
     console.log('Exit App')
     app.quit()
   }
