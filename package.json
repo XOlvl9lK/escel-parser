@@ -3,7 +3,7 @@
   "productName": "excel-parser",
   "version": "2.0.0",
   "description": "excel-parser",
-  "main": "build/main.js",
+  "main": "build/src/main.js",
   "scripts": {
     "start": "npm run compile && electron-forge start",
     "package": "electron-forge package",

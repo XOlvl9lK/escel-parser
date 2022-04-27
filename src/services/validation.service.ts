@@ -35,25 +35,27 @@ export class ValidationService {
   private diagnosesRegexp = /\D\d\d\.\d/i
   private dateRegexp = /\d{2}\.\d{2}\.\d{4}/i
   private logger
-  private errors: string[] = []
 
   constructor(pathToLogs: string) {
     this.logger = LoggerService.getInstance(pathToLogs)
   }
 
   validateRow(row: ExcelRow): ValidatedRow {
-    this.differenceInKeys(Object.keys(row))
-    !row.lastName && this.errors.push('Фамилия пациента не указана')
-    !row.firstName && this.errors.push('Имя пациента не указано')
-    !this.possibleGender.includes(row.gender || '') && this.errors.push(`Пол не определён: ${row.gender}`)
-    !row.birthDate && this.errors.push('Дата рождения не указана')
-    row.birthDate && this.dateFormatValidation(row.birthDate, 'Дата рождения')
+    const errors: string[] = []
+    this.differenceInKeys(Object.keys(row), errors)
+    !row.lastName && errors.push('Фамилия пациента не указана')
+    !row.firstName && errors.push('Имя пациента не указано')
+    if (!this.possibleGender.includes(row.gender || '')) {
+      errors.push(`Пол не определён: ${row.gender}`)
+    }
+    !row.birthDate && errors.push('Дата рождения не указана')
+    row.birthDate && this.dateFormatValidation(row.birthDate, 'Дата рождения', errors)
     row.birthDate = this.convertDateFormat(row.birthDate)
-    !row.policyNumber && this.errors.push('Полис ОМС не указан')
-    !row.diagnoses && this.errors.push('Диагнозы не указаны')
-    row.diagnoses && this.diagnosesValidation(row.diagnoses)
-    !row.pdnStartDate && this.errors.push('Дата начала действия ПДН не передана')
-    row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate, 'Дата начала действия ПДН')
+    !row.policyNumber && errors.push('Полис ОМС не указан')
+    !row.diagnoses && errors.push('Диагнозы не указаны')
+    row.diagnoses && this.diagnosesValidation(row.diagnoses, errors)
+    !row.pdnStartDate && errors.push('Дата начала действия ПДН не передана')
+    row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate, 'Дата начала действия ПДН', errors)
     row.pdnStartDate = this.convertDateFormat(row.pdnStartDate)
 
     const validatedRow = {
@@ -61,7 +63,7 @@ export class ValidationService {
       diagnoses: this.diagnosesToArray(row.diagnoses || ''),
       key: row.policyNumber,
       timestamp: Date.now(),
-      errors: this.errors
+      errors: errors
     }
 
     return validatedRow
@@ -97,28 +99,28 @@ export class ValidationService {
     })
   }
 
-  private differenceInKeys(keys: string[]) {
+  private differenceInKeys(keys: string[], errors: string[]) {
     const unexpectedProperties = keys.filter(i => !this.possibleKeys.includes(i))
-    unexpectedProperties.length && this.errors.push(`В исходном файле присутствуют лишние столбцы: ${unexpectedProperties.join(', ')}`)
+    unexpectedProperties.length && errors.push(`В исходном файле присутствуют лишние столбцы: ${unexpectedProperties.join(', ')}`)
   }
 
-  private diagnosesValidation(diagnoses: string) {
+  private diagnosesValidation(diagnoses: string, errors: string[]) {
     const diagnosesArr = this.diagnosesToArray(diagnoses)
     for (let diagnose of diagnosesArr) {
       if (diagnose.match(this.diagnosesRegexp)?.[0]?.length !== diagnose.length) {
-        this.errors.push(`Не удалось обработать диагноз пациента: ${diagnose}`)
+        errors.push(`Не удалось обработать диагноз пациента: ${diagnose}`)
       }
     }
   }
 
-  private dateFormatValidation(date: string, context: string) {
+  private dateFormatValidation(date: string, context: string, errors: string[]) {
     if (date) {
       const match = date.match(this.dateRegexp)
-      if (!match) return this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
-      match?.index !== 0 && this.errors.push(`${context}. Не соответствует формат данных: ${date}`)
+      if (!match) return errors.push(`${context}. Не соответствует формат данных: ${date}`)
+      match?.index !== 0 && errors.push(`${context}. Не соответствует формат данных: ${date}`)
       return
     }
-    return this.errors.push(`${context}. Не соответствует формат данных`)
+    return errors.push(`${context}. Не соответствует формат данных`)
   }
 
   private convertDateFormat(date?: string) {
