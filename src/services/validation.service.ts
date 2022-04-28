@@ -113,22 +113,24 @@ export class ValidationService {
     }
   }
 
-  private dateFormatValidation(date: string, context: string, errors: string[]) {
+  private dateFormatValidation(date: string | number, context: string, errors: string[]) {
+    const dateString = date + ''
     if (date) {
-      const match = date.match(this.dateRegexp)
-      if (!match) return errors.push(`${context}. Не соответствует формат данных: ${date}`)
-      match?.index !== 0 && errors.push(`${context}. Не соответствует формат данных: ${date}`)
+      const match = dateString.match(this.dateRegexp)
+      if (!match) return errors.push(`${context}. Не соответствует формат данных: ${dateString}`)
+      match?.index !== 0 && errors.push(`${context}. Не соответствует формат данных: ${dateString}`)
       return
     }
     return errors.push(`${context}. Не соответствует формат данных`)
   }
 
-  private convertDateFormat(date?: string) {
+  private convertDateFormat(date?: string | number) {
     if (date) {
-      if (date?.match(this.dateRegexp)) {
-        return date.split('.').reverse().join('-')
+      const dateSting = date + ''
+      if (dateSting?.match(this.dateRegexp)) {
+        return dateSting.split('.').reverse().join('-')
       } else {
-        return date
+        return date + ''
       }
     }
   }
