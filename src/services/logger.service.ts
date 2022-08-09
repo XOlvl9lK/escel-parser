@@ -30,22 +30,23 @@ export class LoggerService {
   private static instance: LoggerService
   private readonly pathToFile: string
 
-  private constructor(pathToLogs: string) {
-    this.pathToFile = pathToLogs
+  private constructor() {
+    this.pathToFile = join(process.cwd(), 'logs.csv')
     if (!existsSync(this.pathToFile)) {
       const firstLine = 'Статус;Данные Пациента;Причина ошибки;Запись;Дата и время записи'
       writeFileSync(this.pathToFile, firstLine)
     }
   }
 
-  static getInstance(pathToLogs: string): LoggerService {
+  static getInstance(): LoggerService {
     if (!LoggerService.instance) {
-      LoggerService.instance = new LoggerService(pathToLogs)
+      LoggerService.instance = new LoggerService()
     }
     return LoggerService.instance
   }
 
   writeLine(line: LogLine) {
+    console.log('this.pathToFile', this.pathToFile)
     appendFileSync(this.pathToFile, `${EOL}${line.status};${line.patientData};${line.errors || ''};${line.message};${line.date.toISOString()}`)
   }
 }
@@ -56,17 +57,11 @@ export class LogsPath {
   private slash = process.platform === 'linux' || process.platform === 'darwin' ? '/' : '\\'
 
   constructor(path: string) {
+    console.log('Exist', existsSync(this.pathToConfig))
     if (!existsSync(this.pathToConfig)) {
       writeFileSync(this.pathToConfig, path + this.slash + 'logs.csv')
     }
     this.pathToLogs = path + 'logs.csv'
-  }
-
-  changePath(path: string) {
-    if (existsSync(this.pathToConfig)) {
-      unlinkSync(this.pathToConfig)
-    }
-    writeFileSync(this.pathToConfig, path + this.slash + 'logs.csv')
   }
 
   getPath() {

@@ -8,15 +8,15 @@ export class KafkaService {
   private kafka: Kafka
   private producer: Producer
 
-  private constructor(pathToLogs: string, settings: KafkaSettings) {
-    this.logger = LoggerService.getInstance(pathToLogs)
+  private constructor(settings: KafkaSettings) {
+    this.logger = LoggerService.getInstance()
     this.kafka = new Kafka(settings.getSettings())
     this.producer = this.kafka.producer()
   }
 
-  static getInstance(pathToLogs: string, settings: KafkaSettings): KafkaService {
+  static getInstance(settings: KafkaSettings): KafkaService {
     if (!KafkaService.instance) {
-      KafkaService.instance = new KafkaService(pathToLogs, settings)
+      KafkaService.instance = new KafkaService(settings)
     }
     return KafkaService.instance
   }

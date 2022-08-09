@@ -36,8 +36,8 @@ export class ValidationService {
   private dateRegexp = /\d{2}\.\d{2}\.\d{4}/i
   private logger
 
-  constructor(pathToLogs: string) {
-    this.logger = LoggerService.getInstance(pathToLogs)
+  constructor() {
+    this.logger = LoggerService.getInstance()
   }
 
   validateRow(row: ExcelRow): ValidatedRow {

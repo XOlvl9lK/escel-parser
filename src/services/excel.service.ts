@@ -1,4 +1,5 @@
 import { readFile, utils } from 'xlsx'
+import * as ExcelJs from 'exceljs'
 
 export interface Row {
   lastName?: string;
@@ -19,9 +20,27 @@ export class ExcelService {
     return readFile(path, { type: 'file' })
   }
 
-  static convertToJSON(path: string): ExcelRow[] {
-    const workbook = this.readFile(path)
-    const sheetNameList = workbook.SheetNames
-    return utils.sheet_to_json(workbook.Sheets[sheetNameList[0]])
+  static async convertToJSON(path: string): Promise<ExcelRow[]> {
+    const workbook = new ExcelJs.Workbook()
+    const worksheet = await workbook.csv.readFile(path)
+    const rows: ExcelRow[] = []
+    let i = 2
+    // @ts-ignore
+    while (worksheet.getRow(i).values[1]) {
+      // @ts-ignore
+      const split = worksheet.getRow(i).values[1].split(';')
+      rows.push({
+        lastName: split[0],
+        firstName: split[1],
+        middleName: split[2],
+        gender: split[3],
+        birthDate: split[4],
+        policyNumber: split[5],
+        diagnoses: split[6],
+        pdnStartDate: split[7]
+      })
+      i++
+    }
+    return rows
   }
 }
