@@ -28,16 +28,16 @@ export class ExcelService {
     // @ts-ignore
     while (worksheet.getRow(i).values[1]) {
       // @ts-ignore
-      const split = worksheet.getRow(i).values[1].split(';')
+      const split = worksheet.getRow(i).values as any as Array<any>
       rows.push({
-        lastName: split[0],
-        firstName: split[1],
-        middleName: split[2],
-        gender: split[3],
-        birthDate: split[4],
-        policyNumber: split[5],
-        diagnoses: split[6],
-        pdnStartDate: split[7]
+        lastName: split[1],
+        firstName: split[2],
+        middleName: split[3],
+        gender: split[4],
+        birthDate: split[5],
+        policyNumber: split[6],
+        diagnoses: split[7],
+        pdnStartDate: split[8]
       })
       i++
     }

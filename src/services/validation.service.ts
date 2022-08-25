@@ -136,6 +136,6 @@ export class ValidationService {
   }
 
   private diagnosesToArray(diagnoses: string) {
-    return diagnoses.split(',')
+    return diagnoses.split(';')
   }
 }

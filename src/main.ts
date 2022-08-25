@@ -42,7 +42,7 @@ async function start() {
 
         const validation = new ValidationService()
         const messagesArr = await ExcelService.convertToJSON(path)
-
+        console.log(messagesArr)
         const validatedRows = messagesArr.map(m => validation.validateRow(m))
         const rowsForSending = validation.prepareForSending(validatedRows)
         const kafka = KafkaService.getInstance(
