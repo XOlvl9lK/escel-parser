@@ -27,11 +27,11 @@ export class KafkaService {
       key: r.key
     }))
     try {
-      // await this.producer.connect()
-      // await this.producer.send({
-      //   topic,
-      //   messages
-      // })
+      await this.producer.connect()
+      await this.producer.send({
+        topic,
+        messages
+      })
       rows.forEach(r => {
         const logLine = LogLine.getSuccessfulLine(r.patientData, r.message)
         this.logger.writeLine(logLine)

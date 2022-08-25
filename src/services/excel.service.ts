@@ -16,31 +16,41 @@ export interface ExcelRow extends Row {
 }
 
 export class ExcelService {
-  static readFile(path: string) {
-    return readFile(path, { type: 'file' })
-  }
 
   static async convertToJSON(path: string): Promise<ExcelRow[]> {
-    const workbook = new ExcelJs.Workbook()
-    const worksheet = await workbook.csv.readFile(path)
+    const worksheet = await ExcelService.readFile(path)
+
     const rows: ExcelRow[] = []
     let i = 2
     // @ts-ignore
-    while (worksheet.getRow(i).values[1]) {
+    while (worksheet.getRow(i).values.length) {
       // @ts-ignore
-      const split = worksheet.getRow(i).values as any as Array<any>
+      const rowValues = worksheet.getRow(i).values as any as Array<any>
       rows.push({
-        lastName: split[1],
-        firstName: split[2],
-        middleName: split[3],
-        gender: split[4],
-        birthDate: split[5],
-        policyNumber: split[6],
-        diagnoses: split[7],
-        pdnStartDate: split[8]
+        lastName: rowValues[1],
+        firstName: rowValues[2],
+        middleName: rowValues[3],
+        gender: rowValues[4],
+        birthDate: rowValues[5],
+        policyNumber: rowValues[6],
+        diagnoses: rowValues[7],
+        pdnStartDate: rowValues[8]
       })
       i++
     }
     return rows
+  }
+
+  private static async readFile(path: string) {
+    const format = path.split('.')[1]
+    const workbook = new ExcelJs.Workbook()
+    let worksheet
+    if (format === 'csv') {
+      worksheet = await workbook.csv.readFile(path, { parserOptions: { delimiter: ';', encoding: 'utf8' }})
+    } else {
+      await workbook.xlsx.readFile(path)
+      worksheet = workbook.getWorksheet('Лист1')
+    }
+    return worksheet
   }
 }
