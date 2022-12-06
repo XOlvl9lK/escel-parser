@@ -1,10 +1,10 @@
-import {ExcelRow, Row} from "./excel.service";
-import {LoggerService, LogLine} from "./logger.service";
+import { ExcelRow, Row } from './excel.service';
+import { LoggerService, LogLine } from './logger.service';
 
 export interface ValidatedRow extends Row {
   key?: string;
   timestamp: number;
-  diagnoses?: string[];
+  diagnoses?: string
   errors: string[]
 }
 
@@ -52,21 +52,16 @@ export class ValidationService {
     row.birthDate && this.dateFormatValidation(row.birthDate, 'Дата рождения', errors)
     row.birthDate = this.convertDateFormat(row.birthDate)
     !row.policyNumber && errors.push('Полис ОМС не указан')
-    !row.diagnoses && errors.push('Диагнозы не указаны')
-    row.diagnoses && this.diagnosesValidation(row.diagnoses, errors)
     !row.pdnStartDate && errors.push('Дата начала действия ПДН не передана')
     row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate, 'Дата начала действия ПДН', errors)
     row.pdnStartDate = this.convertDateFormat(row.pdnStartDate)
 
-    const validatedRow = {
+    return {
       ...row,
-      diagnoses: this.diagnosesToArray(row.diagnoses || ''),
       key: row.policyNumber,
       timestamp: Date.now(),
       errors: errors
     }
-
-    return validatedRow
   }
 
   prepareForSending(rows: ValidatedRow[]): RowForSending[] {
@@ -104,15 +99,6 @@ export class ValidationService {
     unexpectedProperties.length && errors.push(`В исходном файле присутствуют лишние столбцы: ${unexpectedProperties.join(', ')}`)
   }
 
-  private diagnosesValidation(diagnoses: string, errors: string[]) {
-    const diagnosesArr = this.diagnosesToArray(diagnoses)
-    for (let diagnose of diagnosesArr) {
-      if (diagnose.match(this.diagnosesRegexp)?.[0]?.length !== diagnose.length) {
-        errors.push(`Не удалось обработать диагноз пациента: ${diagnose}`)
-      }
-    }
-  }
-
   private dateFormatValidation(date: string | number, context: string, errors: string[]) {
     const dateString = date + ''
     if (date) {
@@ -133,9 +119,5 @@ export class ValidationService {
         return date + ''
       }
     }
-  }
-
-  private diagnosesToArray(diagnoses: string) {
-    return diagnoses.split(';')
   }
 }

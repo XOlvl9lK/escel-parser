@@ -2,12 +2,9 @@ import yargs, { Arguments } from "yargs";
 import { existsSync } from "fs";
 import { ValidationService } from "./services/validation.service";
 import { ExcelService } from "./services/excel.service";
-import { LogsPath } from "./services/logger.service";
 import { KafkaService, KafkaSettings } from "./services/kafka.service";
 import { hideBin } from "yargs/helpers";
 import { join } from 'path';
-//@ts-ignore
-require('./services/config.txt')
 
 const CHUNK_SIZE = 4000
 
@@ -42,7 +39,6 @@ async function start() {
 
         const validation = new ValidationService()
         const messagesArr = await ExcelService.convertToJSON(path)
-        console.log(messagesArr)
         const validatedRows = messagesArr.map(m => validation.validateRow(m))
         const rowsForSending = validation.prepareForSending(validatedRows)
         const kafka = KafkaService.getInstance(

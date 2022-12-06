@@ -24,7 +24,6 @@ export class ExcelService {
     let i = 2
     // @ts-ignore
     while (worksheet.getRow(i).values.length) {
-      // @ts-ignore
       const rowValues = worksheet.getRow(i).values as any as Array<any>
       rows.push({
         lastName: rowValues[1],
@@ -38,6 +37,7 @@ export class ExcelService {
       })
       i++
     }
+
     return rows
   }
 

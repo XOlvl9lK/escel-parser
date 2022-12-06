@@ -8,7 +8,7 @@
     "compile": "npm run clear:build && tsc && copyfiles -f src/services/config.txt build/services",
     "clear:build": "rimraf build/*",
     "package": "npm run compile && pkg .",
-    "run": "npm run compile && node build/main.js --path=C:\\xmp.csv"
+    "run": "npm run compile && node build/main.js --path=C:\\xmp.xlsx"
   },
   "author": "Denis",
   "license": "ISC",
