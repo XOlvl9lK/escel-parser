@@ -69,8 +69,3 @@ export class KafkaSettings {
     return new KafkaSettings('EMIAS.DN.PDN.A', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
   }
 }
-
-export enum KafkaSettingsEnum {
-  TEST = 'тест',
-  PPAK = 'ппак'
-}
