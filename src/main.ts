@@ -4,7 +4,7 @@ import { ValidationService } from "./services/validation.service";
 import { ExcelService } from "./services/excel.service";
 import { KafkaService, KafkaSettings } from "./services/kafka.service";
 import { hideBin } from "yargs/helpers";
-import { join } from 'path';
+import { join, resolve } from 'path';
 
 const CHUNK_SIZE = 4000
 
@@ -49,9 +49,9 @@ async function start() {
           await kafka.sendMessage('dnPatient', chunk)
         }
 
-        console.log('Messages sent')
+        console.log(`${rowsForSending.length} messages sent`)
         console.log('Logs available at')
-        console.log(join(process.cwd(), 'logs.csv'))
+        console.log(join(resolve('./'), 'logs.csv'))
         console.log('Exit app')
 
       }

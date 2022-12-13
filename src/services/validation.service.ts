@@ -32,7 +32,6 @@ export class ValidationService {
     'F',
     'f'
   ]
-  private diagnosesRegexp = /(\D\d\d\.\d)|(\D\d\d)/i
   private dateRegexp = /\d{2}\.\d{2}\.\d{4}/i
   private logger
 
