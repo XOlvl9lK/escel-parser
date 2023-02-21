@@ -1,15 +1,20 @@
 import yargs, { Arguments } from "yargs";
 import { existsSync } from "fs";
-import { ValidationService } from "./services/validation.service";
-import { ExcelService } from "./services/excel.service";
 import { KafkaService, KafkaSettings } from "./services/kafka.service";
 import { hideBin } from "yargs/helpers";
 import { join, resolve } from 'path';
+import { Factory } from './services/factory';
 
 const CHUNK_SIZE = 4000
 
+const exitApp = (message: string) => {
+  console.log(message)
+  console.log('Exit app')
+  process.exit()
+}
+
 async function start() {
-  console.log('App started')
+  console.log('3.0.0 App started')
   const argv = yargs(hideBin(process.argv)).argv as Arguments<{ path?: string, settings?: string }>
   let path: string | undefined
   let settings: string | undefined
@@ -33,36 +38,37 @@ async function start() {
   try {
     if (path) {
       if (!existsSync(path)) {
-        console.log('File not found')
-        console.log('Exit app')
+        exitApp('File not found')
       } else {
+        const factory = new Factory(path)
+        const { converter, topic, validator } = await factory.getInstances(exitApp)
 
-        const validation = new ValidationService()
-        const messagesArr = await ExcelService.convertToJSON(path)
-        const validatedRows = messagesArr.map(m => validation.validateRow(m))
-        const rowsForSending = validation.prepareForSending(validatedRows)
+        const messagesArr = converter.convertToJSON()
+        const validatedRows = messagesArr.map(m => validator.validateRow(m))
+        const rowsForSending = validator.prepareForSending(validatedRows)
+
         const kafka = KafkaService.getInstance(
           kafkaSettings
         )
+        console.log('rowsForSending', rowsForSending)
+
         for (let i = 0; i < rowsForSending.length; i += CHUNK_SIZE) {
           const chunk = rowsForSending.slice(i, i + CHUNK_SIZE)
-          await kafka.sendMessage('dnPatient', chunk)
+          await kafka.sendMessage(topic, chunk)
         }
 
         console.log(`${rowsForSending.length} messages sent`)
         console.log('Logs available at')
         console.log(join(resolve('./'), 'logs.csv'))
         console.log('Exit app')
-
+        process.exit()
       }
     } else {
-      console.log('Path not specified')
-      console.log('Exit App')
+      exitApp('Path not specified')
     }
   } catch (e) {
-    console.log('App crash')
     console.log(e)
-    console.log('Exit App')
+    exitApp('App crash')
   }
 }
 

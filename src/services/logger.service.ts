@@ -8,21 +8,23 @@ export class LogLine {
   errors?: string;
   message: string;
   date: Date;
+  fileId: string
 
-  private constructor(status: string, patientData: string, date: Date, message: string, errors?: string) {
+  private constructor(fileId: string, status: string, patientData: string, date: Date, message: string, errors?: string) {
     this.status = status
     this.patientData = patientData
     this.date = date
     this.message = message
     this.errors = errors
+    this.fileId = fileId
   }
 
-  static getSuccessfulLine(patientData: string, message: string) {
-    return new LogLine('Отправлено в ЕСУ', patientData, new Date, message)
+  static getSuccessfulLine(fileId: string, patientData: string, message: string) {
+    return new LogLine(fileId, 'Отправлено в ЕСУ', patientData, new Date, message)
   }
 
-  static getUnsuccessfulLine(patientData: string, message: string, errors?: string) {
-    return new LogLine('Не отправлено в ЕСУ', patientData, new Date(), message, errors)
+  static getUnsuccessfulLine(fileId: string, patientData: string, message: string, errors?: string) {
+    return new LogLine(fileId, 'Не отправлено в ЕСУ', patientData, new Date(), message, errors)
   }
 }
 
@@ -33,7 +35,7 @@ export class LoggerService {
   private constructor() {
     this.pathToFile = join(resolve('./'), 'logs.csv')
     if (!existsSync(this.pathToFile)) {
-      const firstLine = 'Статус;Данные Пациента;Причина ошибки;Запись;Дата и время записи'
+      const firstLine = 'ИД списка пациентов;Статус;Данные Пациента;Причина ошибки;Запись;Дата и время записи'
       writeFileSync(this.pathToFile, firstLine)
     }
   }
@@ -46,6 +48,6 @@ export class LoggerService {
   }
 
   writeLine(line: LogLine) {
-    appendFileSync(this.pathToFile, `${EOL}${line.status};${line.patientData};${line.errors || ''};${line.message};${line.date.toISOString()}`)
+    appendFileSync(this.pathToFile, `${EOL}${line.fileId};${line.status};${line.patientData};${line.errors || ''};${line.message};${line.date.toISOString()}`)
   }
 }

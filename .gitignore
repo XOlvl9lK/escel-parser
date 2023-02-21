@@ -3,6 +3,6 @@ node_modules
 out
 logs.txt
 dist
-logs.csv
+distributions/logs.csv
 build
 distributions

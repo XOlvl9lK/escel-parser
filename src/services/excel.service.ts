@@ -8,22 +8,30 @@ export interface Row {
   birthDate?: string;
   policyNumber?: string;
   pdnStartDate?: string;
+  emiasId?: string
 }
 
-export interface ExcelRow extends Row {
+export interface ExcelRowV1 extends Row {
   diagnoses?: string;
 }
 
-export class ExcelService {
+export interface Converter {
+  convertToJSON: () => any[]
+}
 
-  static async convertToJSON(path: string): Promise<ExcelRow[]> {
-    const worksheet = await ExcelService.readFile(path)
+export class ExcelServiceV1 implements Converter {
+  private worksheet: ExcelJs.Worksheet
 
-    const rows: ExcelRow[] = []
+  constructor(worksheet: ExcelJs.Worksheet) {
+    this.worksheet = worksheet
+  }
+
+  convertToJSON(): ExcelRowV1[] {
+    const rows: ExcelRowV1[] = []
     let i = 2
     // @ts-ignore
-    while (worksheet.getRow(i).values.length) {
-      const rowValues = worksheet.getRow(i).values as any as Array<any>
+    while (this.worksheet.getRow(i).values.length) {
+      const rowValues = this.worksheet.getRow(i).values as any as Array<any>
       rows.push({
         lastName: rowValues[1],
         firstName: rowValues[2],
@@ -39,17 +47,31 @@ export class ExcelService {
 
     return rows
   }
+}
 
-  private static async readFile(path: string) {
-    const format = path.split('.')[1]
-    const workbook = new ExcelJs.Workbook()
-    let worksheet
-    if (format === 'csv') {
-      worksheet = await workbook.csv.readFile(path, { parserOptions: { delimiter: ';', encoding: 'utf8' }})
-    } else {
-      await workbook.xlsx.readFile(path)
-      worksheet = workbook.getWorksheet('Лист1')
+export interface ExcelRowV2 extends Row {
+}
+
+export class ExcelServiceV2 implements Converter {
+  private worksheet: ExcelJs.Worksheet
+
+  constructor(worksheet: ExcelJs.Worksheet) {
+    this.worksheet = worksheet
+  }
+
+  convertToJSON(): ExcelRowV2[] {
+    const rows: ExcelRowV2[] = []
+    let i = 2
+    // @ts-ignore
+    while (this.worksheet.getRow(i).values.length) {
+      const rowValues = this.worksheet.getRow(i).values as any as Array<any>
+      rows.push({
+        emiasId: rowValues[1],
+        pdnStartDate: rowValues[2],
+      })
+      i++
     }
-    return worksheet
+
+    return rows
   }
 }

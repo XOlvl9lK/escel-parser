@@ -2,6 +2,8 @@ import {Kafka, Producer} from "kafkajs";
 import {LoggerService, LogLine} from "./logger.service";
 import { RowForSending } from "./validation.service";
 
+export type TopicType = 'dnPatient' | 'dnPatientV2'
+
 export class KafkaService {
   private static instance: KafkaService
   private logger;
@@ -21,7 +23,7 @@ export class KafkaService {
     return KafkaService.instance
   }
 
-  async sendMessage(topic: string, rows: RowForSending[]): Promise<void> {
+  async sendMessage(topic: TopicType, rows: RowForSending[]): Promise<void> {
     const messages = rows.map(r => ({
       value: r.message,
       key: r.key
@@ -33,12 +35,12 @@ export class KafkaService {
         messages
       })
       rows.forEach(r => {
-        const logLine = LogLine.getSuccessfulLine(r.patientData, r.message)
+        const logLine = LogLine.getSuccessfulLine(r.fileId, r.patientData, r.message)
         this.logger.writeLine(logLine)
       })
     } catch (e: any) {
       rows.forEach(r => {
-        const logLine = LogLine.getUnsuccessfulLine(r.patientData, JSON.stringify(r.message), 'Техническая ошибка при отправке сообщения' + ' ' + (e?.message || '') + ' ' + (e?.stack || ''))
+        const logLine = LogLine.getUnsuccessfulLine(r.fileId, r.patientData, JSON.stringify(r.message), 'Техническая ошибка при отправке сообщения' + ' ' + (e?.message || '') + ' ' + (e?.stack || ''))
         this.logger.writeLine(logLine)
       })
     }
