@@ -1,11 +1,18 @@
-import { ExcelRow, Row } from './excel.service';
+import { ExcelRowV1, Row, ExcelRowV2 } from './excel.service';
 import { LoggerService, LogLine } from './logger.service';
+import { v4 as uuidv4 } from 'uuid';
+
+export interface Validator {
+  validateRow: (row: any) => ValidatedRow
+  prepareForSending: (rows: ValidatedRow[]) => RowForSending[]
+}
 
 export interface ValidatedRow extends Row {
   key?: string;
   timestamp: number;
   diagnoses?: string
   errors: string[]
+  fileId: string
 }
 
 export interface RowForSending {
@@ -13,9 +20,42 @@ export interface RowForSending {
   message: string
   errors: string[]
   key?: string
+  fileId: string
 }
 
-export class ValidationService {
+class ValidationServiceBase {
+  protected logger
+  protected dateRegexp = /\d{2}\.\d{2}\.\d{4}/i
+  protected fileId = uuidv4()
+
+  constructor() {
+    this.logger = LoggerService.getInstance()
+  }
+
+  protected dateFormatValidation(date: string | number, context: string, errors: string[]) {
+    const dateString = date + ''
+    if (date) {
+      const match = dateString.match(this.dateRegexp)
+      if (!match) return errors.push(`${context}. Не соответствует формат данных: ${dateString}`)
+      match?.index !== 0 && errors.push(`${context}. Не соответствует формат данных: ${dateString}`)
+      return
+    }
+    return errors.push(`${context}. Не соответствует формат данных`)
+  }
+
+  protected convertDateFormat(date?: string | number) {
+    if (date) {
+      const dateSting = date + ''
+      if (dateSting?.match(this.dateRegexp)) {
+        return dateSting.split('.').reverse().join('-')
+      } else {
+        return date + ''
+      }
+    }
+  }
+}
+
+export class ValidationServiceV1 extends ValidationServiceBase implements Validator {
   private possibleKeys = [
     'lastName',
     'firstName',
@@ -32,14 +72,13 @@ export class ValidationService {
     'F',
     'f'
   ]
-  private dateRegexp = /\d{2}\.\d{2}\.\d{4}/i
-  private logger
+
 
   constructor() {
-    this.logger = LoggerService.getInstance()
+    super()
   }
 
-  validateRow(row: ExcelRow): ValidatedRow {
+  validateRow(row: ExcelRowV1): ValidatedRow {
     const errors: string[] = []
     this.differenceInKeys(Object.keys(row), errors)
     !row.lastName && errors.push('Фамилия пациента не указана')
@@ -59,32 +98,35 @@ export class ValidationService {
       ...row,
       key: row.policyNumber,
       timestamp: Date.now(),
-      errors: errors
+      errors: errors,
+      fileId: this.fileId
     }
   }
 
   prepareForSending(rows: ValidatedRow[]): RowForSending[] {
-    return rows.map(row => {
-      const patientData = row.policyNumber || row.lastName + ' ' + row.firstName + ' ' + row.middleName
+    return rows.map(r => {
+      const patientData = r.policyNumber || r.lastName + ' ' + r.firstName + ' ' + r.middleName
       const message = JSON.stringify({
-        lastName: row.lastName,
-        firstName: row.firstName,
-        middleName: row.middleName,
-        gender: row.gender,
-        birthDate: row.birthDate,
-        policyNumber: row.policyNumber,
-        pdnStartDate: row.pdnStartDate,
-        diagnoses: row.diagnoses
+        lastName: r.lastName,
+        firstName: r.firstName,
+        middleName: r.middleName,
+        gender: r.gender,
+        birthDate: r.birthDate,
+        policyNumber: r.policyNumber,
+        pdnStartDate: r.pdnStartDate,
+        diagnoses: r.diagnoses,
+        fileId: r.fileId
       })
       return {
         patientData,
         message,
-        errors: row.errors,
-        key: row.policyNumber
+        errors: r.errors,
+        key: r.policyNumber,
+        fileId: r.fileId
       }
-    }).filter(row => {
-      if (row.errors.length) {
-        const logLine = LogLine.getUnsuccessfulLine(row.patientData, row.message, row.errors.join('. '))
+    }).filter(r => {
+      if (r.errors.length) {
+        const logLine = LogLine.getUnsuccessfulLine(r.fileId, r.patientData, r.message, r.errors.join('. '))
         this.logger.writeLine(logLine)
         return false
       } else {
@@ -97,26 +139,51 @@ export class ValidationService {
     const unexpectedProperties = keys.filter(i => !this.possibleKeys.includes(i))
     unexpectedProperties.length && errors.push(`В исходном файле присутствуют лишние столбцы: ${unexpectedProperties.join(', ')}`)
   }
+}
 
-  private dateFormatValidation(date: string | number, context: string, errors: string[]) {
-    const dateString = date + ''
-    if (date) {
-      const match = dateString.match(this.dateRegexp)
-      if (!match) return errors.push(`${context}. Не соответствует формат данных: ${dateString}`)
-      match?.index !== 0 && errors.push(`${context}. Не соответствует формат данных: ${dateString}`)
-      return
-    }
-    return errors.push(`${context}. Не соответствует формат данных`)
+export class ValidationServiceV2 extends ValidationServiceBase implements Validator {
+  constructor() {
+    super()
   }
 
-  private convertDateFormat(date?: string | number) {
-    if (date) {
-      const dateSting = date + ''
-      if (dateSting?.match(this.dateRegexp)) {
-        return dateSting.split('.').reverse().join('-')
-      } else {
-        return date + ''
-      }
+  validateRow(row: ExcelRowV2): ValidatedRow {
+    const errors: string[] = []
+    !row.emiasId && errors.push('ИД пациента не указан')
+    !row.pdnStartDate && errors.push('Дата начала действия ПДН не передана')
+    row.pdnStartDate && this.dateFormatValidation(row.pdnStartDate, 'Дата начала действия ПДН', errors)
+    row.pdnStartDate = this.convertDateFormat(row.pdnStartDate)
+
+    return {
+      ...row,
+      key: row.emiasId,
+      timestamp: Date.now(),
+      errors: errors,
+      fileId: this.fileId
     }
+  }
+
+  prepareForSending(rows: ValidatedRow[]): RowForSending[] {
+    return rows.map(r => {
+      const message = JSON.stringify({
+        emiasId: r.emiasId,
+        pdnStartDate: r.pdnStartDate,
+        fileId: r.fileId
+      })
+      return {
+        patientData: r.emiasId!,
+        message,
+        errors: r.errors,
+        key: r.emiasId,
+        fileId: r.fileId
+      }
+    }).filter(r => {
+      if (r.errors.length) {
+        const logLine = LogLine.getUnsuccessfulLine(r.fileId, r.patientData, r.message, r.errors.join('. '))
+        this.logger.writeLine(logLine)
+        return false
+      } else {
+        return true
+      }
+    })
   }
 }
