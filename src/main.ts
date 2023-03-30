@@ -50,7 +50,6 @@ async function start() {
         const kafka = KafkaService.getInstance(
           kafkaSettings
         )
-        console.log('rowsForSending', rowsForSending)
 
         for (let i = 0; i < rowsForSending.length; i += CHUNK_SIZE) {
           const chunk = rowsForSending.slice(i, i + CHUNK_SIZE)

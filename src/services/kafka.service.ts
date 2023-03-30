@@ -1,4 +1,4 @@
-import {Kafka, Producer} from "kafkajs";
+import { Kafka, Partitioners, Producer } from 'kafkajs';
 import {LoggerService, LogLine} from "./logger.service";
 import { RowForSending } from "./validation.service";
 
@@ -13,7 +13,7 @@ export class KafkaService {
   private constructor(settings: KafkaSettings) {
     this.logger = LoggerService.getInstance()
     this.kafka = new Kafka(settings.getSettings())
-    this.producer = this.kafka.producer()
+    this.producer = this.kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner })
   }
 
   static getInstance(settings: KafkaSettings): KafkaService {

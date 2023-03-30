@@ -112,7 +112,7 @@ export class ValidationServiceV1 extends ValidationServiceBase implements Valida
         middleName: r.middleName,
         gender: r.gender,
         birthDate: r.birthDate,
-        policyNumber: r.policyNumber,
+        policyNumber: String(r.policyNumber),
         pdnStartDate: r.pdnStartDate,
         diagnoses: r.diagnoses,
         fileId: r.fileId
@@ -121,7 +121,7 @@ export class ValidationServiceV1 extends ValidationServiceBase implements Valida
         patientData,
         message,
         errors: r.errors,
-        key: r.policyNumber,
+        key: String(r.policyNumber),
         fileId: r.fileId
       }
     }).filter(r => {
@@ -165,7 +165,7 @@ export class ValidationServiceV2 extends ValidationServiceBase implements Valida
   prepareForSending(rows: ValidatedRow[]): RowForSending[] {
     return rows.map(r => {
       const message = JSON.stringify({
-        emiasId: r.emiasId,
+        emiasId: String(r.emiasId),
         pdnStartDate: r.pdnStartDate,
         fileId: r.fileId
       })
@@ -173,7 +173,7 @@ export class ValidationServiceV2 extends ValidationServiceBase implements Valida
         patientData: r.emiasId!,
         message,
         errors: r.errors,
-        key: r.emiasId,
+        key: String(r.emiasId),
         fileId: r.fileId
       }
     }).filter(r => {
