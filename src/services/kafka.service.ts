@@ -51,7 +51,7 @@ export class KafkaSettings {
   clientId: string
   brokers: string[]
 
-  private constructor(clientId: string, brokers: string[]) {
+  constructor(clientId: string, brokers: string[]) {
     this.clientId = clientId
     this.brokers = brokers
   }
@@ -61,13 +61,5 @@ export class KafkaSettings {
       clientId: this.clientId,
       brokers: this.brokers
     }
-  }
-
-  static createPPAKSettings() {
-    return new KafkaSettings('EMIAS.DN.PDN.A', ['srv-pesu-kaf01:9092', 'srv-pesu-kaf02:9092', 'srv-pesu-kaf03:9092'])
-  }
-
-  static createTestSettings() {
-    return new KafkaSettings('EMIAS.DN.PDN.A', ['10.2.172.24:9092', '10.2.172.25:9092', '10.2.172.26:9092'])
   }
 }
